@@ -29,7 +29,10 @@
 # -yes , https://github.com/HamJaw1432/CSCB58-PROJECT
 #
 # Any additional information that the TA needs to know:
-# -(write here, if any)
+# - The following are some minor changes made to the game after the recording
+#	- New Colours
+#	- Can restart after death
+#	- Minor bug in collition fixed 
 #
 #####################################################################
 .eqv	BASE_ADDRESS	0x10008000
@@ -37,6 +40,8 @@
 .eqv	WHITE_COLOUR	0xffffff
 .eqv	BLACK_COLOUR	0x000000
 .eqv	RED_COLOUR	0xff0000
+.eqv	OBJECT_COLOUR	0xB37A4C
+.eqv	PLAYER_COLOUR	0x45B6FE
 .eqv	TOTAL_UNITS	1024
  
  .data
@@ -170,7 +175,9 @@ end_game:
 	jal clear_screen	# clear the screen
 	jal draw_gameover
 	jal draw_score
-
+wait_for_restart:	
+	jal movement
+	j wait_for_restart
 
 	li $v0, 10 			# terminate the program gracefully
 	syscall
@@ -202,7 +209,7 @@ draw_player:
 	li $t4, RED_COLOUR		
 	j draw_player_loop
 colour_not_collided:
-	li $t4, WHITE_COLOUR
+	li $t4, PLAYER_COLOUR
 draw_player_loop:	
 	bge $t1, $t0, draw_player_loop_break	
 	li $t2, BASE_ADDRESS
@@ -274,7 +281,7 @@ move_down:
 move_left:	
 	lw $t3, 0($s5)
 	addi $t3, $t3, -4		# sutract 4 to move pixel left
-	li $t4, 0
+	li $t4, 4
 	
 	li $t5, 128
 	div $t3, $t5			# calculate x index
@@ -596,7 +603,7 @@ draw_objects:
 	li $t1, 0			# i counter
 	li $t2, BASE_ADDRESS		
 	add $t3, $zero, $s4
-	li $t4, WHITE_COLOUR
+	li $t4, OBJECT_COLOUR
 draw_objects_loop:	
 	# loop through the objects pos array and draw it to the display
 	bge $t1, $t0, draw_objects_loop_break
